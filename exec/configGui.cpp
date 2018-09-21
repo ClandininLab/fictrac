@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     }
 
     /// Init OpenCV windows - only used by GTK backend?
-    cvStartWindowThread();
+    //cvStartWindowThread();
     
     /// Run configuration GUI.
     bool ret = cfg.run();

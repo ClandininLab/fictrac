@@ -41,8 +41,8 @@ else()  # gcc
     find_library(NLOPT_LIB libnlopt.a)
     
     if(PGR_USB3)
-        set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PGR_DIR})
-        find_library(PGR_LIB libSpinnaker.so)
+        set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PGR_DIR}) # fixme!
+        find_library(PGR_LIB libSpinnaker.so) # fixme!
     endif()
 endif()
 get_filename_component(NLOPT_DIR ${NLOPT_LIB} DIRECTORY)
@@ -65,7 +65,6 @@ endif()
 # add include dirs
 include_directories(${PROJECT_SOURCE_DIR}/include ${OpenCV_INCLUDE_DIRS} ${NLOPT_DIR})
 if(PGR_USB3)
-    include_directories(${PGR_DIR}/include)
     include_directories(${PGR_DIR}/include/spinnaker)
 endif()
 
