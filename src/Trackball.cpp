@@ -391,7 +391,7 @@ Trackball::Trackball(string cfg_fn)
         _sphere_view.setTo(Scalar::all(128));
     }
     if (_save_debug) {
-        string vid_fn = _base_fn + "-debug.mp4";
+        string vid_fn = _base_fn + "-debug.avi";
         _vid_writer.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(4 * DRAW_CELL_DIM, 3 * DRAW_CELL_DIM));
         if (!_vid_writer.isOpened()) {
             LOG_ERR("Error! Unable to open output video (%s).", vid_fn.c_str());
