@@ -61,6 +61,7 @@ const double THRESH_WIN_PC_DEFAULT = 0.25;
 const uint8_t SPHERE_MAP_FIRST_HIT_BONUS = 64;
 
 const bool DO_DISPLAY_DEFAULT = true;
+const bool SAVE_RAW_DEFAULT = false;
 const bool SAVE_DEBUG_DEFAULT = false;
 
 ///
@@ -377,6 +378,11 @@ Trackball::Trackball(string cfg_fn)
         LOG_WRN("Warning! Using default value for do_display (%d).", _do_display);
         _cfg.add("do_display", _do_display);
     }
+    _save_raw = SAVE_RAW_DEFAULT;
+    if (!source->isLive() || !_cfg.getBool("save_raw", _save_raw)) {
+        LOG_WRN("Warning! Using default value for save_raw (%d).", _save_raw);
+        _cfg.add("save_raw", _save_raw);
+    }
     _save_debug = SAVE_DEBUG_DEFAULT;
     if (!_cfg.getBool("save_debug", _save_debug)) {
         LOG_WRN("Warning! Using default value for save_debug (%d).", _save_debug);
@@ -390,11 +396,20 @@ Trackball::Trackball(string cfg_fn)
         _sphere_view.create(_map_h, _map_w, CV_8UC1);
         _sphere_view.setTo(Scalar::all(128));
     }
+    if (_save_raw) {
+        string vid_fn = _base_fn + "-raw.avi";
+        _raw_vid.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(source->getWidth(), source->getHeight()));
+        if (!_raw_vid.isOpened()) {
+            LOG_ERR("Error! Unable to open raw output video (%s).", vid_fn.c_str());
+            _active = false;
+            return;
+        }
+    }
     if (_save_debug) {
         string vid_fn = _base_fn + "-debug.avi";
-        _vid_writer.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(4 * DRAW_CELL_DIM, 3 * DRAW_CELL_DIM));
-        if (!_vid_writer.isOpened()) {
-            LOG_ERR("Error! Unable to open output video (%s).", vid_fn.c_str());
+        _debug_vid.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(4 * DRAW_CELL_DIM, 3 * DRAW_CELL_DIM));
+        if (!_debug_vid.isOpened()) {
+            LOG_ERR("Error! Unable to open debug output video (%s).", vid_fn.c_str());
             _active = false;
             return;
         }
@@ -467,6 +482,7 @@ void Trackball::reset()
     _ang_dist = 0;
     _step_avg = 0;
     _step_var = 0;
+    _evals_avg = 0;
 
     /// Drawing.
     if (_do_display) {
@@ -900,13 +916,10 @@ double Trackball::testRotation(const double x[3])
     /* Note:
     
     The orientation matrix, _R_roi, is accumulated by pre-multiplying each successive rotation, x.
-
     When rotating the view vectors, the orientation matrix is also pre-multiplied,
     such that the history of rotations is applied in order.
-
     See here for explanation of pre- vs post-multiplying:
     http://www.me.unm.edu/~starr/teaching/me582/postmultiply.pdf
-
     The orientation matrix transpose is used below to rotate the vectors and not the axes.
     */
 
@@ -1191,7 +1204,7 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
     /// Draw sphere orientation history (animal position history on sphere).
     {
         static const CmPoint up(0, 0, -1.0);
-        static CmPoint up_roi = up.getTransformed(_roi_to_cam_R.t() * _cam_to_lab_R.t()) * _r_d_ratio;
+        static CmPoint up_roi = up.getTransformed(_roi_to_cam_R.t() * _cam_to_lab_R.t()).getNormalised() * _r_d_ratio;
 
         double ppx = -1, ppy = -1;
         draw_camera->vectorToPixelIndex(up_roi, ppx, ppy);
@@ -1208,7 +1221,7 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
                 draw_camera->vectorToPixelIndex(vec, px, py);
 
                 // draw link
-                if ((ppx >= 0) && (ppy >= 0) && (px >= 0) && (py >= 0)) {
+                if ((ppx >= 0) && (ppy >= 0) && (px >= 0) && (py >= 0) && (ppx < draw_input.cols) && (ppy > draw_input.rows) && (px < draw_input.cols) && (py < draw_input.rows)) {
                     float mix = (i + 0.5f) / static_cast<float>(R_roi_hist.size());
                     cv::Vec3b rgb = draw_input.at<cv::Vec3b>(static_cast<int>((ppy + py) / 2.f), static_cast<int>((ppx + px) / 2.f));   // px/py are pixel index values
                     int b = static_cast<int>((1 - mix) * rgb[0] + mix * 255.f + 0.5f);
@@ -1278,8 +1291,11 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
         _active = false;
     }
 
+    if (_save_raw) {
+        _raw_vid.write(src_frame);
+    }
     if (_save_debug) {
-        _vid_writer.write(canvas);
+        _debug_vid.write(canvas);
     }
 }
 
