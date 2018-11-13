@@ -22,6 +22,8 @@ public:
     }
 	virtual bool rewind()=0;
 	virtual bool grab(cv::Mat& frame)=0;
+	virtual void startPulses() {};
+	virtual void stopPulses() {};
 
 	bool isOpen() { return _open; }
 	int getWidth() { return _width; }

@@ -161,6 +161,9 @@ void FrameGrabber::terminate()
     unique_lock<mutex> l(_qMutex);
     _active = false;
     _qCond.notify_all();
+
+    //Luke added this for trigger syncing with Bruker
+    //_source->stopPulses();
 }
 
 ///

@@ -9,6 +9,7 @@
 #include "PGRSource.h"
 
 #include "Logger.h"
+#include "timing.h"
 
 using namespace Spinnaker;
 using cv::Mat;
@@ -44,6 +45,9 @@ PGRSource::PGRSource(int index)
         // Initialize camera
         _cam->Init();
 
+	//Luke added this for trigger syncing with Bruker
+	//_cam->TriggerMode.SetValue(TriggerMode_Off);
+
         // Begin acquiring images
         _cam->BeginAcquisition();
 
@@ -51,6 +55,14 @@ PGRSource::PGRSource(int index)
         _width = _cam->Width();
         _height = _cam->Height();
         _fps = _cam->AcquisitionFrameRate();
+
+		
+	//_cam->LineSource(LineSource_ExposureActive);
+
+	//_cam->TriggerMode.SetValue(TriggerMode_Off);
+	//line2 = _cam->LineSelector(Line2);
+	//line2 = LineSelector.GetEntryByName("Line2");
+	//_cam->LineSource.GetEntryByName("ExposureActive");
 
         LOG("PGR camera initialised (%dx%d @ %.3f fps)!", _width, _height, _fps);
 
@@ -63,6 +75,16 @@ PGRSource::PGRSource(int index)
     catch (...) {
         LOG_ERR("Error opening capture device!");
     }
+}
+
+void PGRSource::startPulses()
+{
+_cam->TriggerMode.SetValue(TriggerMode_Off);
+}
+
+void PGRSource::stopPulses()
+{
+_cam->TriggerMode.SetValue(TriggerMode_On);
 }
 
 double PGRSource::getFPS()
@@ -87,7 +109,8 @@ bool PGRSource::grab(cv::Mat& frame)
         // Retrieve next received image
         long int timeout = _fps > 0 ? std::max(static_cast<long int>(1000), static_cast<long int>(1000. / _fps)) : 1000; // set capture timeout to at least 1000 ms
         pgr_image = _cam->GetNextImage(timeout);
-        _timestamp = _cam->Timestamp();
+        //_timestamp = _cam->Timestamp();
+	_timestamp = static_cast<double>(ts_ms());
 
         // Ensure image completion
         if (pgr_image->IsIncomplete()) {
@@ -118,11 +141,15 @@ bool PGRSource::grab(cv::Mat& frame)
 PGRSource::~PGRSource()
 {
 	if( _open ) {
+
+	//Luke added this for trigger syncing with Bruker
+	//_cam->TriggerMode.SetValue(TriggerMode_On);
+
         _cam->EndAcquisition();
         _open = false;
 	}
     _cam = NULL;
-	
+
     // Clear camera list before releasing system
     _camList.Clear();
 

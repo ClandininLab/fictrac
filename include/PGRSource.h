@@ -18,10 +18,12 @@ public:
 	PGRSource(int index=0);
 	virtual ~PGRSource();
 
-    virtual double getFPS();
+	virtual double getFPS();
 	virtual bool setFPS(double fps);
-    virtual bool rewind() { return false; };
+	virtual bool rewind() { return false; };
 	virtual bool grab(cv::Mat& frame);
+	virtual void startPulses();
+	virtual void stopPulses();
 
 private:
     Spinnaker::SystemPtr _system;

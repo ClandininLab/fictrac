@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     //tracker.printState();
     tracker.writeTemplate();
 
-    PRINT("\n\nHit ENTER to exit..");
-    getchar_clean();
+    //Luke commented out
+    //PRINT("\n\nHit ENTER to exit..");
+    //getchar_clean();
 }

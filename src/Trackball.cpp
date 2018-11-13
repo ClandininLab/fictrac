@@ -397,7 +397,7 @@ Trackball::Trackball(string cfg_fn)
         _sphere_view.setTo(Scalar::all(128));
     }
     if (_save_raw) {
-        string vid_fn = _base_fn + "-raw.avi";
+        string vid_fn = _base_fn + execTime() + "-raw.avi";
         _raw_vid.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(source->getWidth(), source->getHeight()));
         if (!_raw_vid.isOpened()) {
             LOG_ERR("Error! Unable to open raw output video (%s).", vid_fn.c_str());
@@ -406,7 +406,7 @@ Trackball::Trackball(string cfg_fn)
         }
     }
     if (_save_debug) {
-        string vid_fn = _base_fn + "-debug.avi";
+        string vid_fn = _base_fn + execTime() + "-debug.avi";
         _debug_vid.open(vid_fn, cv::VideoWriter::fourcc('H', '2', '6', '4'), source->getFPS(), cv::Size(4 * DRAW_CELL_DIM, 3 * DRAW_CELL_DIM));
         if (!_debug_vid.isOpened()) {
             LOG_ERR("Error! Unable to open debug output video (%s).", vid_fn.c_str());
@@ -597,7 +597,7 @@ void Trackball::process()
     tlast = t0;
 
     LOG_DBG("Stopped sphere tracking loop!");
-
+	
     _frameGrabber->terminate();     // make sure we've stopped grabbing frames as well
 
     if (_cnt > 1) {
@@ -1289,6 +1289,8 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
     if (key == 0x1B) {  // esc
         LOG("Exiting..");
         _active = false;
+	//Luke added this for trigger syncing with Bruker
+	//_frameGrabber->terminate();
     }
 
     if (_save_raw) {
