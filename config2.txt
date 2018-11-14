@@ -20,7 +20,7 @@ roi_r            : 0.013475
 save_debug       : 1
 save_raw         : y
 src_fn           : 0
-src_fps          : -1.000000
+src_fps          : 50.0 
 thr_ratio        : 1.250000
 thr_win_pc       : 0.250000
 vfov             : 1.58

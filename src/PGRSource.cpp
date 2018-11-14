@@ -54,8 +54,13 @@ PGRSource::PGRSource(int index)
         // Get some params
         _width = _cam->Width();
         _height = _cam->Height();
-        _fps = _cam->AcquisitionFrameRate();
 
+        // StevenH 13-Nov-2018
+        // Using dummy value for camera FPS, please set the correct
+        // value in the config file.
+
+        // _fps = _cam->AcquisitionFrameRate();
+        _fps = 50;
 		
 	//_cam->LineSource(LineSource_ExposureActive);
 
@@ -107,7 +112,12 @@ bool PGRSource::grab(cv::Mat& frame)
 
     try {
         // Retrieve next received image
-        long int timeout = _fps > 0 ? std::max(static_cast<long int>(1000), static_cast<long int>(1000. / _fps)) : 1000; // set capture timeout to at least 1000 ms
+
+        // StevenH 13-Nov-2018
+        // Using a very long timeout for frame grabbing to allow for external triggering setup
+        // long int timeout = _fps > 0 ? std::max(static_cast<long int>(1000), static_cast<long int>(1000. / _fps)) : 1000; // set capture timeout to at least 1000 ms
+        long int timeout = 5*60*1000;
+
         pgr_image = _cam->GetNextImage(timeout);
         //_timestamp = _cam->Timestamp();
 	_timestamp = static_cast<double>(ts_ms());
