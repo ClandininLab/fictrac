@@ -9,6 +9,7 @@
 #include "PGRSource.h"
 
 #include "Logger.h"
+#include "timing.h"
 
 using namespace Spinnaker;
 using cv::Mat;
@@ -87,8 +88,8 @@ bool PGRSource::grab(cv::Mat& frame)
         // Retrieve next received image
         long int timeout = _fps > 0 ? std::max(static_cast<long int>(1000), static_cast<long int>(1000. / _fps)) : 1000; // set capture timeout to at least 1000 ms
         pgr_image = _cam->GetNextImage(timeout);
-        _timestamp = _cam->Timestamp();
-
+        _timestamp = static_cast<double>(ts_ms());	
+	
         // Ensure image completion
         if (pgr_image->IsIncomplete()) {
             // Retreive and print the image status description
