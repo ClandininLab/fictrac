@@ -44,7 +44,7 @@ public:
 private:
     /// Worker function.
     void process();
-    bool sync_illuminated();
+    void updateSync();
 
     void reset();
     double testRotation(const double x[3]);
@@ -119,6 +119,7 @@ private:
     CmPoint64f _dr_lab, _r_lab;
     cv::Mat _R_lab;
     double _ts;
+    bool _sync_illuminated;
 
     double _velx, _vely, _step_mag, _step_dir, _intx, _inty, _heading, _posx, _posy;
     

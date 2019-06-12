@@ -564,7 +564,7 @@ void Trackball::reset()
 }
 
 // Edit this line to change the threshold used for sync detection
-bool Trackball::sync_illuminated(){
+void Trackball::updateSync(){
 	// variables defined for convenience in specifying the area over which to average
 	int img_width = _src_frame.cols; 
 	int img_height = _src_frame.rows;
@@ -592,7 +592,7 @@ bool Trackball::sync_illuminated(){
 	mean /= (row_stop-row_start+1);
 	mean /= (col_stop-col_start+1);
 	
-	return mean > thresh;
+	_sync_illuminated = mean > thresh;
 }
 
 ///
@@ -621,7 +621,8 @@ void Trackball::process()
         PRINT("");
         LOG("Frame %d", _cnt);
 
-	LOG("SYNC_ILLUMINATED: %d", (int)sync_illuminated());
+	updateSync();
+	LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
 
         /// Handle reset request
         if (_do_reset) {
@@ -993,7 +994,9 @@ bool Trackball::logData()
     // integrated x movement | integrated y movement (mouse output equivalent)
     ss << _intx << ", " << _inty << ", ";
     // timestamp | sequence number
-    ss << _ts << ", " << _seq << std::endl;
+    ss << _ts << ", " << _seq << ", ";
+    // sync indicator
+    ss << _sync_illuminated << std::endl;
 
     // async i/o
     bool ret = true;

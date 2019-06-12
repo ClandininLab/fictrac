@@ -11,7 +11,7 @@ opt_do_global    : n
 opt_max_err      : -1.000000
 opt_max_evals    : 50
 opt_tol          : 0.001
-out_port         : -1
+out_port         : 33333
 q_factor         : 6
 roi_c            : { 0.000844, 0.008616, 0.999963 }
 roi_circ         : { 523, 33, 593, 64, 659, 117, 204, 43, 82, 152 }
