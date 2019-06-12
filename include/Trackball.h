@@ -44,6 +44,7 @@ public:
 private:
     /// Worker function.
     void process();
+    bool sync_illuminated();
 
     void reset();
     double testRotation(const double x[3]);

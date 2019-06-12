@@ -563,6 +563,38 @@ void Trackball::reset()
     _do_reset = false;
 }
 
+// Edit this line to change the threshold used for sync detection
+bool Trackball::sync_illuminated(){
+	// variables defined for convenience in specifying the area over which to average
+	int img_width = _src_frame.cols; 
+	int img_height = _src_frame.rows;
+	
+	// change the ROI for averaging here
+	int row_start = img_height-44;
+	int row_stop = img_height-1;
+	int col_start = 0;
+	int col_stop = 51;
+	
+	// change the min/max values for sync detection here
+	int dark_value = 55;
+	int light_value = 255;
+
+	// main algorithm 
+	double thresh = 0.5*(dark_value+light_value);
+	double mean = 0.0;
+
+	for (int row=row_start; row <= row_stop; row++) {
+		for (int col=col_start; col <= col_stop; col++) {
+			mean += _src_frame.at<uchar>(row, col);
+		}
+	}
+
+	mean /= (row_stop-row_start+1);
+	mean /= (col_stop-col_start+1);
+	
+	return mean > thresh;
+}
+
 ///
 ///
 ///
@@ -588,6 +620,8 @@ void Trackball::process()
 
         PRINT("");
         LOG("Frame %d", _cnt);
+
+	LOG("SYNC_ILLUMINATED: %d", (int)sync_illuminated());
 
         /// Handle reset request
         if (_do_reset) {
