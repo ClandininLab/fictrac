@@ -15,7 +15,7 @@
 
 /// OpenCV individual includes required by gcc?
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>  
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
 
@@ -99,7 +99,7 @@ private:
     /// Sphere vars.
     double _sphere_rad, _r_d_ratio;
     CmPoint64f _sphere_c;
-    
+
     /// Optimisation.
     std::unique_ptr<Localiser> _localOpt, _globalOpt;
     double _error_thresh, _err;
@@ -120,9 +120,10 @@ private:
     cv::Mat _R_lab;
     double _ts;
     bool _sync_illuminated;
+    double _sync_mean;
 
     double _velx, _vely, _step_mag, _step_dir, _intx, _inty, _heading, _posx, _posy;
-    
+
     // test data
     double _dist, _ang_dist, _step_avg, _step_var, _evals_avg;
 

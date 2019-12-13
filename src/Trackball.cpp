@@ -22,7 +22,7 @@
 
 /// OpenCV individual includes required by gcc?
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>  
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/videoio.hpp>
 
@@ -84,7 +84,7 @@ bool intersectSphere(const double camVec[3], double sphereVec[3], const double r
 }
 
 ///
-/// 
+///
 ///
 Trackball::Trackball(string cfg_fn)
     : _init(false), _reset(true), _clean_map(true), _active(true), _kill(false), _do_reset(false)
@@ -210,7 +210,7 @@ Trackball::Trackball(string cfg_fn)
             else {
                 LOG_DBG("No valid mask ignore regions specified in config file (roi_ignr)!");
             }
-                
+
             /// Sphere config read successfully.
             LOG("Input sphere mask automatically generated using %d ignore ROIs!", ignr_polys.size());
         }
@@ -566,20 +566,20 @@ void Trackball::reset()
 // Edit this line to change the threshold used for sync detection
 void Trackball::updateSync(){
 	// variables defined for convenience in specifying the area over which to average
-	int img_width = _src_frame.cols; 
+	int img_width = _src_frame.cols;
 	int img_height = _src_frame.rows;
-	
+
 	// change the ROI for averaging here
-	int row_start = img_height-44;
+	int row_start = img_height-15;
 	int row_stop = img_height-1;
 	int col_start = 0;
-	int col_stop = 51;
-	
+	int col_stop = 29;
+
 	// change the min/max values for sync detection here
-	int dark_value = 55;
+	int dark_value = 120;
 	int light_value = 255;
 
-	// main algorithm 
+	// main algorithm
 	double thresh = 0.5*(dark_value+light_value);
 	double mean = 0.0;
 
@@ -591,8 +591,9 @@ void Trackball::updateSync(){
 
 	mean /= (row_stop-row_start+1);
 	mean /= (col_stop-col_start+1);
-	
+
 	_sync_illuminated = mean > thresh;
+  _sync_mean = mean;
 }
 
 ///
@@ -622,7 +623,8 @@ void Trackball::process()
         LOG("Frame %d", _cnt);
 
 	updateSync();
-	LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
+  LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
+  LOG("SYNC_MEAN: %d", (int)_sync_mean);
 
         /// Handle reset request
         if (_do_reset) {
@@ -761,7 +763,7 @@ bool Trackball::doSearch(bool allow_global = false)
         if (bad_frame) {
             _r_roi = CmPoint64f(0, 0, 0);  // zero absolute orientation
         }
-        
+
         // reset sphere to found orientation with zero motion
         _dr_roi = CmPoint64f(0, 0, 0);  // zero relative rotation
         _R_roi = CmPoint64f::omegaToMatrix(_r_roi);
@@ -837,7 +839,7 @@ void Trackball::updateSphere()
             if (_do_display) { _sphere_view.at<uint8_t>(py, px) = proi[j]; }
         }
     }
-    
+
     if (cnt > 0) {
         _clean_map = false;
         LOG_DBG("Sphere ROI match overlap: %.1f%%", 100 * good / static_cast<double>(cnt));
@@ -860,7 +862,7 @@ void Trackball::updatePath()
 
     // abs vec roi
     _r_roi = CmPoint64f::matrixToOmega(_R_roi);
-    
+
     // rel vec cam
     _dr_cam = _dr_roi/*.getTransformed(_roi_to_cam_R)*/;
 
@@ -908,7 +910,7 @@ void Trackball::updatePath()
     _velx = _dr_lab[1];
     _vely = -_dr_lab[0];
     _step_mag = sqrt(_velx * _velx + _vely * _vely); // magnitude (radians) of ball rotation excluding turning (change in heading)
-    
+
     // test data
     if (_cnt > 0) {
         _dist += _step_mag;
@@ -996,7 +998,7 @@ bool Trackball::logData()
     // timestamp | sequence number
     ss << _ts << ", " << _seq << ", ";
     // sync indicator
-    ss << _sync_illuminated << std::endl;
+    ss << _sync_illuminated << ", " << _sync_mean << ", " << std::endl;
 
     // async i/o
     bool ret = true;
@@ -1031,7 +1033,7 @@ double Trackball::testRotation(const double x[3])
     m[8] = lmat[6] * rmat[2] + lmat[7] * rmat[5] + lmat[8] * rmat[8];
 
     /* Note:
-    
+
     The orientation matrix, _R_roi, is accumulated by pre-multiplying each successive rotation, x.
 
     When rotating the view vectors, the orientation matrix is also pre-multiplied,
@@ -1238,7 +1240,7 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
         2 * DRAW_CELL_DIM, 2 * DRAW_CELL_DIM, radPerPix, 360 * CM_D2R);
     static CameraRemapPtr draw_remapper = CameraRemapPtr(new CameraRemap(
         _src_model, draw_camera, _cam_to_roi));
-        
+
     Mat draw_input = canvas(Rect(0, 0, 2 * DRAW_CELL_DIM, 2 * DRAW_CELL_DIM));
     draw_remapper->apply(src_frame, draw_input);
 
@@ -1387,7 +1389,7 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
         canvas.cols - 184, 15,
         255, 255, 0);
     shadowText(canvas, "input image",
-        2, 2 * DRAW_CELL_DIM - 8, 
+        2, 2 * DRAW_CELL_DIM - 8,
         255, 255, 0);
     shadowText(canvas, "flat path",
         2, 3 * DRAW_CELL_DIM - 8,
@@ -1442,7 +1444,7 @@ void Trackball::dumpState()
 bool Trackball::writeTemplate(std::string fn)
 {
     if (!_init) { return false; }
-    
+
     string template_fn = _base_fn + "-template.png";
 
     bool ret = cv::imwrite(template_fn, _sphere_map);
