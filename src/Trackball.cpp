@@ -979,6 +979,7 @@ bool Trackball::logData()
     std::stringstream ss;
     ss.precision(14);
 
+    /*
     // frame_count
     ss << _cnt << ", ";
     // rel_vec_cam[3] | error
@@ -999,6 +1000,16 @@ bool Trackball::logData()
     ss << _ts << ", " << _seq << ", ";
     // sync indicator
     ss << _sync_illuminated << ", " << _sync_mean << ", " << std::endl;
+    */
+
+    // integrated xpos | integrated ypos | integrated heading
+    ss << _posx << ", " << _posy << ", " << _heading << ", ";
+    // timestamp
+    ss << _ts << ", ";
+    // sync indicator
+    ss << _sync_mean << ", " << ts_ms() << std::endl;
+
+
 
     // async i/o
     bool ret = true;
@@ -1006,6 +1017,7 @@ bool Trackball::logData()
         ret &= _data_sock->addMsg("FT, " + ss.str());
     }
     ret &= _data_log->addMsg(ss.str());
+    //std::cout << ss.str().size(); //AH MC
     return ret;
 }
 
