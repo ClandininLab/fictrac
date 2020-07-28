@@ -576,11 +576,11 @@ void Trackball::updateSync(){
 	int col_stop = 29;
 
 	// change the min/max values for sync detection here
-	int dark_value = 120;
-	int light_value = 255;
+	//int dark_value = 120;
+	//int light_value = 255;
 
 	// main algorithm
-	double thresh = 0.5*(dark_value+light_value);
+	//double thresh = 0.5*(dark_value+light_value);
 	double mean = 0.0;
 
 	for (int row=row_start; row <= row_stop; row++) {
@@ -592,7 +592,7 @@ void Trackball::updateSync(){
 	mean /= (row_stop-row_start+1);
 	mean /= (col_stop-col_start+1);
 
-	_sync_illuminated = mean > thresh;
+	//_sync_illuminated = mean > thresh;
   _sync_mean = mean;
 }
 
@@ -619,12 +619,12 @@ void Trackball::process()
     while (!_kill && _active && _frameGrabber->getNextFrameSet(_src_frame, _roi_frame, _ts)) {
         t1 = ts_ms();
 
-        PRINT("");
+        //PRINT("");
         LOG("Frame %d", _cnt);
 
 	updateSync();
-  LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
-  LOG("SYNC_MEAN: %d", (int)_sync_mean);
+  //LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
+  //LOG("SYNC_MEAN: %d", (int)_sync_mean);
 
         /// Handle reset request
         if (_do_reset) {
