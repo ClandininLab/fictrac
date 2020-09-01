@@ -4,14 +4,14 @@ c2a_cnrs_yz      : { 552, 174, 192, 148, 196, 601, 550, 628 }
 c2a_r            : { 1.541894, -0.747592, -0.674898 }
 c2a_src          : c2a_cnrs_yz
 c2a_t            : { -0.019980, 0.025145, 22.942841 }
-do_display       : y
+do_display       : n
 max_bad_frames   : -1
 opt_bound        : 0.35
 opt_do_global    : n
 opt_max_err      : -1.000000
 opt_max_evals    : 50
 opt_tol          : 0.001
-out_port         : -1
+out_port         : 33334
 q_factor         : 6
 roi_c            : { 0.000024, 0.008871, 0.999961 }
 roi_circ         : { 116, 353, 222, 126, 566, 35, 689, 88, 755, 140, 371, 33, 702, 93 }
