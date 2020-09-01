@@ -570,10 +570,10 @@ void Trackball::updateSync(){
 	int img_height = _src_frame.rows;
 
 	// change the ROI for averaging here
-	int row_start = img_height-15;
+	int row_start = img_height-21;
 	int row_stop = img_height-1;
 	int col_start = 0;
-	int col_stop = 29;
+	int col_stop = 21;
 
 	// change the min/max values for sync detection here
 	//int dark_value = 55;
@@ -619,11 +619,9 @@ void Trackball::process()
     while (!_kill && _active && _frameGrabber->getNextFrameSet(_src_frame, _roi_frame, _ts)) {
         t1 = ts_ms();
 
-        PRINT("");
         LOG("Frame %d", _cnt);
 
 	updateSync();
-	LOG("SYNC_ILLUMINATED: %d", (int)_sync_illuminated);
 
         /// Handle reset request
         if (_do_reset) {
