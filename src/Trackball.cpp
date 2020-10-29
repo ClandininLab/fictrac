@@ -55,6 +55,12 @@ const bool DO_DISPLAY_DEFAULT = true;
 const bool SAVE_RAW_DEFAULT = false;
 const bool SAVE_DEBUG_DEFAULT = false;
 
+const int SYNC_COL_START = 496;
+const int SYNC_COL_END = 512;
+const int SYNC_ROW_START = 43;
+const int SYNC_ROW_END = 60;
+
+
 /// OpenCV codecs for video writing
 const vector<vector<std::string>> CODECS = {
     {"h264", "H264", "avi"},
@@ -361,6 +367,27 @@ Trackball::Trackball(string cfg_fn)
         LOG_WRN("Warning! Using default value for thr_win_pc (%f).", thresh_win_pc);
         _cfg.add("thr_win_pc", thresh_win_pc);
     }
+    int sync_col_start = SYNC_COL_START;
+    if (!_cfg.getInt("sync_col_start", sync_col_start)) {
+        LOG_WRN("Warning! Using default value for sync_col_start (%d).", sync_col_start);
+        _cfg.add("sync_col_start", sync_col_start);
+    }
+    int sync_col_end = SYNC_COL_END;
+    if (!_cfg.getInt("sync_col_end", sync_col_end)) {
+        LOG_WRN("Warning! Using default value for sync_col_end (%d).", sync_col_end);
+        _cfg.add("sync_col_end", sync_col_end);
+    }
+    int sync_row_start = SYNC_ROW_START;
+    if (!_cfg.getInt("sync_row_start", sync_row_start)) {
+        LOG_WRN("Warning! Using default value for sync_row_start (%d).", sync_row_start);
+        _cfg.add("sync_row_start", sync_row_start);
+    }
+    int sync_row_end = SYNC_ROW_END;
+    if (!_cfg.getInt("sync_row_end", sync_row_end)) {
+        LOG_WRN("Warning! Using default value for sync_row_end (%d).", sync_row_end);
+        _cfg.add("sync_row_end", sync_row_end);
+    }
+    _sync_rect = cv::Rect(sync_col_start, sync_row_start, sync_col_end-sync_col_start, sync_row_end-sync_row_start);
 
     /// Init optimisers.
     _localOpt = make_unique<Localiser>(
@@ -565,35 +592,7 @@ void Trackball::reset()
 
 // Edit this line to change the threshold used for sync detection
 void Trackball::updateSync(){
-	// variables defined for convenience in specifying the area over which to average
-	int img_width = _src_frame.cols;
-	int img_height = _src_frame.rows;
-
-	// change the ROI for averaging here
-	int row_start = img_height-21;
-	int row_stop = img_height-1;
-	int col_start = 0;
-	int col_stop = 21;
-
-	// change the min/max values for sync detection here
-	//int dark_value = 55;
-	//int light_value = 255;
-
-	// main algorithm
-	//double thresh = 0.5*(dark_value+light_value);
-	double mean = 0.0;
-
-	for (int row=row_start; row <= row_stop; row++) {
-		for (int col=col_start; col <= col_stop; col++) {
-			mean += _src_frame.at<uchar>(row, col);
-		}
-	}
-
-	mean /= (row_stop-row_start+1);
-	mean /= (col_stop-col_start+1);
-
-	//_sync_illuminated = mean > thresh;
-  _sync_mean = mean;
+  _sync_mean = cv::mean(_src_frame(_sync_rect)).val[0];
 }
 
 ///
@@ -621,7 +620,7 @@ void Trackball::process()
 
         LOG("Frame %d", _cnt);
 
-	updateSync();
+        updateSync();
 
         /// Handle reset request
         if (_do_reset) {
@@ -1230,6 +1229,9 @@ void Trackball::drawCanvas(shared_ptr<DrawData> data)
     Mat& sphere_map = data->sphere_map;
     deque<Mat>& R_roi_hist = data->R_roi_hist;
     deque<CmPoint64f>& pos_heading_hist = data->pos_heading_hist;
+
+    // Draw red rectangle on sync area
+    cv::rectangle(src_frame, _sync_rect, cv::Scalar(0, 0, 255), 2);
 
     /// Draw source image.
     double radPerPix = _sphere_rad * 3.0 / (2 * DRAW_CELL_DIM);

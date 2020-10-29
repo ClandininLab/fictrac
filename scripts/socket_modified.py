@@ -45,7 +45,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         inty = float(toks[21])
         ts = float(toks[22])
         seq = int(toks[23])
-        sync = int(toks[24])
+        #sync = int(toks[24])
+        sync = toks[24]
 
         # Do something ...
         print(f'posx: {posx}, posy: {posy}, sync: {sync}')

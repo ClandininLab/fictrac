@@ -80,6 +80,9 @@ private:
 
     std::unique_ptr<std::thread> _drawThread;
 
+    // sync rectangle
+    cv::Rect _sync_rect;
+
 private:
 
     ConfigParser _cfg;
@@ -119,7 +122,6 @@ private:
     CmPoint64f _dr_lab, _r_lab;
     cv::Mat _R_lab;
     double _ts;
-    bool _sync_illuminated;
     double _sync_mean;
 
     double _velx, _vely, _step_mag, _step_dir, _intx, _inty, _heading, _posx, _posy;
