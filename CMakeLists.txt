@@ -85,7 +85,7 @@ if(PGR_USB2 OR PGR_USB3)
         if(PGR_USB2)
             include_directories(${PGR_DIR}/include/flycapture)   # for ubuntu default install dir
         elseif(PGR_USB3)
-            include_directories(${PGR_DIR}/include/spinnaker)   # for ubuntu default install dir
+            include_directories(${PGR_DIR}/include)   # for ubuntu default install dir
         endif()
     endif()
 endif()
